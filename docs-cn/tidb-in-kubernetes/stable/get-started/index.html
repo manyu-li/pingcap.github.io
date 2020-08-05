@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta name="robots" content="noindex"><meta charset="utf-8"/><meta content="IE=edge" http-equiv="X-UA-Compatible"/><meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport"/>
+<script>
+window.ga =
+    window.ga ||
+    function() {
+        ;(ga.q = ga.q || []).push(arguments)
+    }
+ga.l = +new Date()
+ga('create', 'UA-99991864-4', 'auto')
+ga('send', 'pageview')
+</script>
+<script async="" src="https://download.pingcap.com/js/ga-analytics.js"></script>
+<style media="screen" type="text/css">
+    .st_tree {
+        display: none;
+    }
+</style>
+<link href="https://download.pingcap.com/style/github-markdown.css" rel="stylesheet"/>
+<link href="/css/doc.css" rel="stylesheet"/>
+<title>Kubernetes 上使用 TiDB Operator 快速上手 | TiDB 官方用户文档</title><link href="/images/favicon.ico" rel="icon" type="image/x-icon"/>
+<link href="/images/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+<link href="/images/apple-touch-icon.png" rel="apple-touch-icon"/>
+<meta content="介绍如何在 Kubernetes 上使用 TiDB Operator 部署 TiDB 集群" name="description"/>
+<meta content="noodp" name="robots"/>
+<meta content="TiDB, MySQL, HTAP, Open Source, Cloud-Native, NewSQL, Aurora Alternative" name="keywords"/>
+<meta content="en_US" property="og:locale"/>
+<meta content="website" property="og:type"/>
+<meta content="Kubernetes 上使用 TiDB Operator 快速上手 | TiDB 官方用户文档" property="og:title"/>
+<meta content="介绍如何在 Kubernetes 上使用 TiDB Operator 部署 TiDB 集群" property="og:description"/>
+<meta content="https://pingcap.com/docs-cn/tidb-in-kubernetes/stable/get-started/" property="og:url"/>
+<meta content="MySQL at Scale. No more manual sharding" property="og:site_name"/>
+<meta content="/images/pingcap-opengraph.jpg" property="og:image"/>
+<meta content="/images/pingcap-opengraph.jpg" property="og:image:secure_url"/><meta content="summary" name="twitter:card"/><meta content="介绍如何在 Kubernetes 上使用 TiDB Operator 部署 TiDB 集群" name="twitter:description"/>
+<meta content="Kubernetes 上使用 TiDB Operator 快速上手 | TiDB 官方用户文档" name="twitter:title"/>
+<meta content="@pingcap" name="twitter:site"/><meta content="https://pingcap.com/images/pingcap-opengraph.jpg" name="twitter:image"/><meta content="@pingcap" name="twitter:creator"/>
+<script type="application/ld+json">
+{
+    "@context": "http:\/\/schema.org",
+    "@type": "WebSite",
+    "url": "https:\/\/pingcap.com\/",
+    "name": "PingCAP",
+    "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https:\/\/pingcap.com\/?s={search_term_string}",
+        "query-input": "required name=search_term_string"
+    }
+}
+</script>
+<script>
+    (function(){
+        var bp = document.createElement('script');
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+<script async="" src="https://accounts.pingcap.com/static/pingcap_sso/js/track.beta.js" type="text/javascript"></script>
+<link as="font" crossorigin="anonymous" href="https://download.pingcap.com/fonts/lato/lato-regular-webfont.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="anonymous" href="https://download.pingcap.com/fonts/lato/lato-regular-webfont.woff" rel="preload" type="font/woff"/>
+<link as="font" crossorigin="anonymous" href="https://download.pingcap.com/fonts/lato/lato-regular-webfont.ttf" rel="preload" type="font/ttf"/>
+<link as="font" crossorigin="anonymous" href="https://download.pingcap.com/fonts/titilliumweb/titilliumweb-regular-webfont.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="anonymous" href="https://download.pingcap.com/fonts/titilliumweb/titilliumweb-regular-webfont.woff" rel="preload" type="font/woff"/>
+<link as="font" crossorigin="anonymous" href="https://download.pingcap.com/fonts/titilliumweb/titilliumweb-regular-webfont.ttf" rel="preload" type="font/ttf"/>
+<link as="script" href="https://download.pingcap.com/js/jquery.min.js" rel="preload"/>
+<link href="/css/main.css" rel="stylesheet"/>
+<link href="https://download.pingcap.com/style/docsearch.min.css" rel="stylesheet"/>
+<script type="text/javascript">
+var trackOutboundLink = function(url) {
+  var redirectTriggered = false
+  ga('send', 'event', 'outbound', 'click', url, {
+    hitCallback: function() {
+      redirectTriggered = true
+      document.location = url
+    }
+  })
+  setTimeout(function() {
+    if (!redirectTriggered) {
+      document.location = url
+    }
+  }, 1500)
+}
+
+var trackViews = function(btn_type, event_category) {
+  var event_label = btn_type
+  var eventCategory = event_category
+  ga('send', 'event', {
+    'eventCategory': eventCategory,
+    'eventAction': 'click',
+    'eventLabel': event_label,
+    'transport': 'beacon'
+  });
+}
+</script>
+<script>if (location.pathname === '/') {
+        if (location.hostname === 'pingcap.github.io') {
+            location.href = '/en/'
+        }
+    }</script></head> <body data-lang="cn"><div id="page-content">
+<header class="fixed-top" role="navigation">
+<div class="container">
+<a class="nav-brand" href="/zh"><img alt="PingCAP" src="/images/pingcap-logo.png"/></a>
+<div class="nav-wrapper">
+<div class="navigation">
+<ul>
+<li><a class="nav-blinking" href="https://university.pingcap.com/" onclick="trackViews('navbar-university', 'pingcap-university_view')" target="_blank">PingCAP
+                            University</a></li>
+<li class="docs-type-selector sel" id="docsTypeSelector">
+<a class="header-doc-nav" href="https://docs.pingcap.com/zh" target="_blank">文档</a>
+</li>
+<li><a href="/cases-cn">案例</a></li>
+<li><a href="/community-cn">社区</a></li>
+<li><a href="/blog-cn">博客</a></li>
+<li><a href="/about-cn">关于</a></li>
+<li><a href="https://asktug.com" onclick="trackViews('navbar-asktug', 'asktug_view')" target="_blank">问答</a></li>
+<li><a href="/download-cn">下载试用</a></li>
+<li><a class="link-download" href="mailto:info@pingcap.com" onclick="trackViews('navbar-contact-us', 'mail_to_info_view')" target="_blank">联系我们</a></li>
+</ul>
+</div>
+<div class="global-search">
+<div class="search-wrapper">
+<span class="icon-search"><svg fill="#fff" height="18" viewbox="0 0 67.125 67.125" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M23.902 0C11.01 0 .523 10.488.523 23.38c0 12.891 10.487 23.379 23.379 23.379a23.258 23.258 0 0 0 14.471-5.037l24.816 24.817c.391.391.902.586 1.414.586s1.023-.195 1.414-.586a2 2 0 0 0 0-2.828L41.293 38.985c3.721-4.142 5.989-9.613 5.989-15.605C47.282 10.488 36.794 0 23.902 0zM4.523 23.38C4.523 12.694 13.216 4 23.902 4c10.687 0 19.38 8.694 19.38 19.38 0 5.396-2.221 10.279-5.791 13.795a1.959 1.959 0 0 0-.488.349 2.003 2.003 0 0 0-.271.343C33.31 40.9 28.825 42.76 23.903 42.76c-10.686-.001-19.38-8.695-19.38-19.38z"></path><path d="M24.075 8.591c-8.25 0-14.962 6.712-14.962 14.962a2 2 0 0 0 4 0c0-6.044 4.918-10.962 10.962-10.962a2 2 0 0 0 0-4z"></path></svg></span>
+<input data-lang="cn" data-type="/tidb-in-kubernetes/" id="search-input" name="q" onsearch="search()" placeholder="搜索 TiDB 文档" type="search"/>
+</div>
+<script>
+    function search() {
+        let lang = 'en'
+        if ($('#search-input').data('lang') == 'cn') {
+            lang = 'zh'
+        }
+        
+        const query = $('#search-input').val()
+        if (query) {
+            url = "https://docs.pingcap.com/" + (lang == 'zh' ? 'zh/' : '') + "search/?lang=" + lang + "&type=tidb&version=v4.0&q=" + query
+            window.location.href = url
+        }
+    }
+</script>
+</div>
+</div>
+<div class="nav-btn nav-slider">
+<i class="material-icons"><svg height="16" viewbox="0 0 459 459" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M0 382.5h459v-51H0v51zM0 255h459v-51H0v51zM0 76.5v51h459v-51H0z" fill="#FFF"></path></svg></i>
+</div>
+</div>
+</header>
+<nav class="mobile-sidebar">
+<div class="nav-header">
+<div class="logo-wrap">
+<a class="nav-brand" href="/en"><img alt="PingCAP" src="/images/pingcap-logo.png"/></a>
+</div>
+</div>
+<ul class="ul-base">
+<li class="sel"><a href="https://docs.pingcap.com/zh/tidb/v4.0/">文档</a></li>
+<li><a href="/cases-cn">案例</a></li>
+<li><a href="/community-cn">社区</a></li>
+<li><a href="/blog-cn">博客</a></li>
+<li><a href="/about-cn">关于</a></li>
+<li><a href="https://asktug.com" onclick="trackViews('navbar-asktug', 'asktug_view')" target="_blank">问答</a></li>
+<li><a href="/download-cn">下载试用</a></li>
+<li><a class="link-download" href="mailto:info@pingcap.com" onclick="trackViews('navbar-contact-us', 'mail_to_info_view')" target="_blank">联系我们</a></li>
+<li><a class="nav-blinking" href="https://university.pingcap.com/" onclick="trackViews('navbar-university', 'pingcap-university_view')" target="_blank">PingCAP University</a></li>
+</ul>
+<div class="nav-footer">
+<div class="contact-list-wrap">
+<div class="flex-list">
+<h4 class="list-title"><strong>Contact</strong></h4>
+<ul class="social social-cn ul-base">
+<li><a class="twitter" href="https://twitter.com/PingCAP" target="_blank"><svg height="18" viewbox="0 0 612 612" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M612 116.258a250.714 250.714 0 0 1-72.088 19.772c25.929-15.527 45.777-40.155 55.184-69.411-24.322 14.379-51.169 24.82-79.775 30.48-22.907-24.437-55.49-39.658-91.63-39.658-69.334 0-125.551 56.217-125.551 125.513 0 9.828 1.109 19.427 3.251 28.606-104.326-5.24-196.835-55.223-258.75-131.174-10.823 18.51-16.98 40.078-16.98 63.101 0 43.559 22.181 81.993 55.835 104.479a125.556 125.556 0 0 1-56.867-15.756v1.568c0 60.806 43.291 111.554 100.693 123.104-10.517 2.83-21.607 4.398-33.08 4.398-8.107 0-15.947-.803-23.634-2.333 15.985 49.907 62.336 86.199 117.253 87.194-42.947 33.654-97.099 53.655-155.916 53.655-10.134 0-20.116-.612-29.944-1.721 55.567 35.681 121.536 56.485 192.438 56.485 230.948 0 357.188-191.291 357.188-357.188l-.421-16.253c24.666-17.593 46.005-39.697 62.794-64.861z"></path></svg></a></li>
+<li><a class="linkedin" href="https://www.linkedin.com/company/pingcap/" target="_blank"><svg height="18" viewbox="0 0 438.536 438.535" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M5.424 145.895H99.64v282.932H5.424zM408.842 171.739c-19.791-21.604-45.967-32.408-78.512-32.408-11.991 0-22.891 1.475-32.695 4.427-9.801 2.95-18.079 7.089-24.838 12.419-6.755 5.33-12.135 10.278-16.129 14.844-3.798 4.337-7.512 9.389-11.136 15.104v-40.232h-93.935l.288 13.706c.193 9.139.288 37.307.288 84.508 0 47.205-.19 108.777-.572 184.722h93.931V270.942c0-9.705 1.041-17.412 3.139-23.127 4-9.712 10.037-17.843 18.131-24.407 8.093-6.572 18.13-9.855 30.125-9.855 16.364 0 28.407 5.662 36.117 16.987 7.707 11.324 11.561 26.98 11.561 46.966V428.82h93.931V266.664c-.007-41.688-9.897-73.328-29.694-94.925zM53.103 9.708c-15.796 0-28.595 4.619-38.4 13.848C4.899 32.787 0 44.441 0 58.529 0 72.42 4.758 84.034 14.275 93.358c9.514 9.325 22.078 13.99 37.685 13.99h.571c15.99 0 28.887-4.661 38.688-13.99 9.801-9.324 14.606-20.934 14.417-34.829-.19-14.087-5.047-25.742-14.561-34.973C81.562 14.323 68.9 9.708 53.103 9.708z"></path></svg></a></li>
+<li><a class="reddit" href="https://www.reddit.com/r/TiDB/" target="_blank"><svg height="18" viewbox="0 0 279.748 279.748" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M279.748 133.142c0-19.299-15.701-35-35-35-10.768 0-20.674 4.812-27.279 13.064-18.532-8.431-39.663-13.626-62.015-15.271l19.206-60.692 42.895 9.294c3.285 12.782 14.901 22.258 28.693 22.258 16.336 0 29.627-13.29 29.627-29.626 0-16.336-13.291-29.627-29.627-29.627-11.801 0-21.999 6.941-26.759 16.95l-49.497-10.725a10.002 10.002 0 0 0-11.651 6.756L134.636 95.43c-26.164.638-50.988 6.053-72.356 15.775-6.606-8.251-16.512-13.063-27.28-13.063-19.299 0-35 15.701-35 35 0 9.373 3.683 18.173 10.222 24.709-3.9 8.37-5.875 17.076-5.875 25.936 0 24.048 14.396 46.492 40.538 63.199 25.447 16.264 59.183 25.221 94.989 25.221 35.808 0 69.542-8.957 94.989-25.221 26.142-16.707 40.538-39.151 40.538-63.199 0-8.859-1.975-17.565-5.875-25.936 6.539-6.537 10.222-15.336 10.222-24.709zM15.369 145.139c-2.212-3.59-3.369-7.688-3.369-11.997 0-12.682 10.317-23 23-23 5.444 0 10.558 1.851 14.649 5.258-14.622 8.302-26.132 18.289-34.28 29.739zm52.671 20.266c0-13.785 11.215-25 25-25s25 11.215 25 25-11.215 25-25 25-25-11.215-25-25zm123.119 57.054c-9.745 10.637-29.396 17.244-51.285 17.244-21.888 0-41.539-6.607-51.284-17.244a9.937 9.937 0 0 1-2.617-7.192 9.933 9.933 0 0 1 3.235-6.937 9.974 9.974 0 0 1 6.754-2.627c2.797 0 5.484 1.183 7.373 3.244 5.803 6.333 20.827 10.756 36.539 10.756s30.737-4.423 36.539-10.756a10.022 10.022 0 0 1 7.374-3.244c2.508 0 4.906.933 6.755 2.627a9.928 9.928 0 0 1 3.234 6.937 9.933 9.933 0 0 1-2.617 7.192zm-4.451-32.054c-13.785 0-25-11.215-25-25s11.215-25 25-25 25 11.215 25 25-11.215 25-25 25zm77.671-45.266c-8.147-11.45-19.657-21.436-34.28-29.739 4.092-3.408 9.205-5.258 14.649-5.258 12.683 0 23 10.318 23 23 0 4.309-1.157 8.407-3.369 11.997z"></path></svg></a></li>
+<li><a class="google-plus" href="https://groups.google.com/forum/#!forum/tidb-user" target="_blank"><svg height="18" viewbox="0 0 491.858 491.858" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M377.472 224.957H201.319v58.718H308.79c-16.032 51.048-63.714 88.077-120.055 88.077-69.492 0-125.823-56.335-125.823-125.824 0-69.492 56.333-125.823 125.823-125.823 34.994 0 66.645 14.289 89.452 37.346l42.622-46.328c-34.04-33.355-80.65-53.929-132.074-53.929C84.5 57.193 0 141.693 0 245.928s84.5 188.737 188.736 188.737c91.307 0 171.248-64.844 188.737-150.989v-58.718l-.001-.001zM491.858 224.857h-36.031v-36.031h-30.886v36.031H388.91v30.883h36.031v36.032h30.886V255.74h36.031z"></path></svg></a></li>
+<li><a class="stack-overflow" href="https://stackoverflow.com/questions/tagged/tidb" target="_blank"><svg height="18" viewbox="0 0 547.597 547.597" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M140.81 475.111h.024l189.91-.269c8.434-.013 15.3-6.886 15.3-15.318v-21.298c0-8.428-6.854-15.288-15.3-15.288l-189.91.264c-8.433.012-15.3 6.885-15.3 15.318v21.31c.001 8.427 6.855 15.281 15.276 15.281z"></path><path d="M58.667 517.854c.073 29.26.073 29.449 3.072 29.449h.055l10.612.294h.086s85.814 0 171.629-.036c42.914-.019 85.821-.05 118-.092 16.09-.019 29.505-.043 38.887-.074 17.803-.055 17.803-.055 17.803-3.072l.3-10.697V333.299c0-8.434-6.866-15.3-15.3-15.3h-11.909c-8.434 0-15.3 6.866-15.3 15.3V496.22c0 5.062-4.119 9.18-9.181 9.18H110.51c-5.061 0-9.18-4.118-9.18-9.18V333.299c0-8.434-6.867-15.3-15.3-15.3H73.82c-8.433 0-15.3 6.86-15.3 15.3 0 23.342.012 76.084.055 122.981.019 23.447.05 45.442.092 61.574z"></path><path d="M142.322 397.399l189.402 17.467c.478.043.948.062 1.413.062 7.956 0 14.468-5.985 15.159-13.917l1.83-21.096c.729-8.396-5.508-15.851-13.898-16.628l-189.102-17.461c-8.593-.795-15.869 5.441-16.653 13.825l-1.97 21.108a15.172 15.172 0 0 0 3.452 11.181 15.19 15.19 0 0 0 10.367 5.459zM437.636 208.849a15.253 15.253 0 0 0 17.694 12.443l21.065-3.678c8.311-1.451 13.898-9.395 12.454-17.706l-32.504-187.23c-1.42-8.207-9.21-13.917-17.692-12.448l-21.065 3.678c-8.311 1.451-13.898 9.395-12.454 17.705l32.502 187.236zM190.333 194.375l163.6 96.708a15.28 15.28 0 0 0 7.778 2.136c5.393 0 10.447-2.876 13.183-7.509l10.876-18.36c2.08-3.519 2.674-7.631 1.658-11.591a15.18 15.18 0 0 0-7.032-9.358l-163.6-96.714c-7.014-4.149-16.836-1.597-20.967 5.374l-10.869 18.36a15.2 15.2 0 0 0-1.658 11.591 15.21 15.21 0 0 0 7.031 9.363zM387.525 240.501a15.276 15.276 0 0 0 12.626 6.659c3.091 0 6.077-.924 8.635-2.681l17.405-11.934c6.953-4.768 8.752-14.314 4.015-21.292L323.29 54.104c-4.584-6.732-14.498-8.623-21.236-3.984l-17.737 12.21c-6.945 4.779-8.727 14.327-3.971 21.291l107.179 156.88zM154.482 302.319l183.465 49.156c1.298.349 2.632.526 3.966.526 6.903 0 12.98-4.67 14.762-11.347l5.508-20.624c2.179-8.152-2.681-16.555-10.826-18.74l-183.465-49.162c-8.017-2.148-16.604 2.852-18.728 10.826l-5.508 20.63c-2.179 8.142 2.68 16.551 10.826 18.735z"></path></svg></a></li>
+<li id="wechat-mobile"><a class="wechat" href="javascript:void(0)"><svg height="18" viewbox="0 0 31.403 31.404" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M31.403 21.306c0-4.597-4.388-8.32-9.8-8.32-5.414 0-9.802 3.725-9.802 8.32 0 4.597 4.388 8.322 9.802 8.322 1.701 0 3.302-.369 4.697-1.019l3.863 1.671-.447-4.309c1.066-1.329 1.687-2.937 1.687-4.665zm-13.102-2.254a1.395 1.395 0 1 1 0-2.79 1.395 1.395 0 0 1 0 2.79zm6.604 0a1.395 1.395 0 1 1 .003-2.79 1.395 1.395 0 0 1-.003 2.79z"></path><path d="M21.604 11.885c1.515 0 2.957.27 4.271.755.009-.175.03-.345.03-.521 0-6.074-5.801-10.996-12.953-10.996C5.799 1.123 0 6.044 0 12.119c0 2.284.822 4.408 2.229 6.167l-.591 5.694 5.104-2.213c1.264.59 2.661.986 4.136 1.189a8.143 8.143 0 0 1-.179-1.65c.001-5.195 4.892-9.421 10.905-9.421zm-4.287-6.428a1.84 1.84 0 1 1-1.841 1.84c0-1.016.825-1.84 1.841-1.84zM8.586 9.139a1.84 1.84 0 0 1 0-3.682 1.84 1.84 0 1 1 0 3.682z"></path></svg></a><div class="qr_code_outer f-hide f-tc">
+<div class="qr_code">
+<i id="close_qrcode"><svg viewbox="0 0 224.512 224.512" xmlns="http://www.w3.org/2000/svg"><path d="M224.507 6.997L217.521 0 112.256 105.258 6.998 0 .005 6.997l105.258 105.257L.005 217.512l6.993 7L112.256 119.24l105.265 105.272 6.986-7-105.258-105.258z" fill="#010002"></path></svg></i>
+<img alt="Wechat qrCode" class="qr_code_img" id="js_qr_code_img" src="/images/wechat-qrcode.jpg"/>
+<p>微信扫一扫<br/> 微信ID：pingcap2015</p>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="subscribe" id="subscribe-mobile"></div>
+</div>
+<div class="container">
+<a class="btn-lang" href="/docs/" id="lang">English</a>
+</div>
+</div>
+</nav>
+<div class="doc">
+<div class="container">
+<div class="sidebar">
+<div class="sticky-sidebar docs-sticky-sidebar">
+<div class="title"> TiDB in Kubernetes 文档 </div>
+<div class="version-switcher">
+<button id="dropdownMenuButton" type="button">v1.1</button>
+<div class="dropdown-menu visibility-hide" id="dropdown-menu-items">
+<a class="dropdown-item " href="
+                /docs-cn/tidb-in-kubernetes/stable/get-started/">v1.1 (stable)</a>
+<a class="dropdown-item unclickable-btn" href="
+                #">v1.0<span class="tooltiptext">This doc does not exist in v1.0</span></a>
+<a class="dropdown-item " href="
+                /docs-cn/tidb-in-kubernetes/dev/get-started/">dev</a></div>
+</div>
+<div class="st_tree nav-toc docs-nav-toc"><ul><li class="has-child"><a href="#">
+<span>关于 TiDB Operator</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/tidb-operator-overview/">
+<span>简介</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/whats-new-in-v1.1/">
+<span>What's New in v1.1</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/notes-tidb-operator-v1.1/">
+<span>TiDB Operator v1.1 重要注意事项</span>
+</a>
+</li></ul>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/get-started/">
+<span>快速上手</span>
+</a>
+</li><li class="has-child"><a href="#">
+<span>部署</span>
+<i class="icon-arrow"></i></a><ul><li class="has-child"><a href="#">
+<span>部署 TiDB 集群</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/deploy-on-aws-eks/">
+<span>部署到 AWS EKS</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/deploy-on-gcp-gke/">
+<span>部署到 GCP GKE</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/deploy-on-alibaba-cloud/">
+<span>部署到阿里云 ACK</span>
+</a>
+</li><li class="has-child"><a href="#">
+<span>部署到自托管的 Kubernetes</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/prerequisites/">
+<span>集群环境要求</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/configure-storage-class/">
+<span>配置 Storage Class</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/deploy-tidb-operator/">
+<span>部署 TiDB Operator</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/configure-a-tidb-cluster/">
+<span>配置 TiDB 集群</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/deploy-on-general-kubernetes/">
+<span>部署 TiDB 集群</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/initialize-a-cluster/">
+<span>初始化 TiDB 集群</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/access-tidb/">
+<span>访问 TiDB 集群</span>
+</a>
+</li></ul>
+</li></ul>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/deploy-tiflash/">
+<span>部署 TiFlash</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/deploy-ticdc/">
+<span>部署 TiCDC</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/deploy-tidb-binlog/">
+<span>部署 TiDB Binlog</span>
+</a>
+</li><li class="has-child"><a href="#">
+<span>部署 TiDB 集群监控</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/monitor-a-tidb-cluster/">
+<span>监控 Kubernetes 和 TiDB 集群</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/monitor-using-tidbmonitor/">
+<span>使用 TidbMonitor 监控 TiDB 集群</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/access-dashboard/">
+<span>访问 TiDB Dashboard</span>
+</a>
+</li></ul>
+</li></ul>
+</li><li class="has-child"><a href="#">
+<span>安全</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/enable-tls-for-mysql-client/">
+<span>为 MySQL 客户端开启 TLS</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/enable-tls-between-components/">
+<span>为 TiDB 组件间开启 TLS</span>
+</a>
+</li></ul>
+</li><li class="has-child"><a href="#">
+<span>运维</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/upgrade-a-tidb-cluster/">
+<span>升级 TiDB 集群</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/upgrade-tidb-operator/">
+<span>升级 TiDB Operator</span>
+</a>
+</li><li class="has-child"><a href="#">
+<span>TiDB 集群伸缩</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/scale-a-tidb-cluster/">
+<span>手动扩缩容</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/enable-tidb-cluster-auto-scaling/">
+<span>自动弹性伸缩</span>
+</a>
+</li></ul>
+</li><li class="has-child"><a href="#">
+<span>备份与恢复</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/backup-and-restore-using-helm-charts/">
+<span>基于 Helm Charts 的备份恢复</span>
+</a>
+</li><li class="has-child"><a href="#">
+<span>基于 CRD 的备份恢复</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/backup-to-gcs/">
+<span>使用 Dumpling 备份 TiDB 集群数据到 GCS</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/restore-from-gcs/">
+<span>使用 TiDB Lightning 恢复 GCS 上的备份数据</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/backup-to-s3/">
+<span>使用 Dumpling 备份 TiDB 集群数据到兼容 S3 的存储</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/restore-from-s3/">
+<span>使用 TiDB Lightning 恢复 S3 兼容存储上的备份数据</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/backup-to-gcs-using-br/">
+<span>使用 BR 备份 TiDB 集群数据到 GCS</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/restore-from-gcs-using-br/">
+<span>使用 BR 恢复 GCS 上的备份数据</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/backup-to-aws-s3-using-br/">
+<span>使用 BR 备份 TiDB 集群数据到兼容 S3 的存储</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/restore-from-aws-s3-using-br/">
+<span>使用 BR 恢复 S3 兼容存储上的备份数据</span>
+</a>
+</li></ul>
+</li></ul>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/restart-a-tidb-cluster/">
+<span>重启 TiDB 集群</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/maintain-a-kubernetes-node/">
+<span>维护 TiDB 集群所在节点</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/view-logs/">
+<span>查看日志</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/use-auto-failover/">
+<span>集群故障自动转移</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/destroy-a-tidb-cluster/">
+<span>销毁 TiDB 集群</span>
+</a>
+</li></ul>
+</li><li class="has-child"><a href="#">
+<span>灾难恢复</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/pd-recover/">
+<span>恢复 PD 集群</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/recover-deleted-cluster/">
+<span>恢复误删的集群</span>
+</a>
+</li></ul>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/restore-data-using-tidb-lightning/">
+<span>导入集群数据</span>
+</a>
+</li><li class="has-child"><a href="#">
+<span>故障诊断</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/tips/">
+<span>使用技巧</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/deploy-failures/">
+<span>部署错误</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/exceptions/">
+<span>集群异常</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/network-issues/">
+<span>网络问题</span>
+</a>
+</li></ul>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/faq/">
+<span>常见问题</span>
+</a>
+</li><li class="has-child"><a href="#">
+<span>参考</span>
+<i class="icon-arrow"></i></a><ul><li class="has-child"><a href="#">
+<span>架构</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/architecture/">
+<span>TiDB Operator 架构</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/tidb-scheduler/">
+<span>TiDB Scheduler 扩展调度器</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/advanced-statefulset/">
+<span>增强型 StatefulSet 控制器</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/enable-admission-webhook/">
+<span>准入控制器</span>
+</a>
+</li></ul>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/benchmark-sysbench/">
+<span>Sysbench 性能测试</span>
+</a>
+</li><li class="leaf-child">
+<a href="https://github.com/pingcap/tidb-operator/blob/release-1.1/docs/api-references/docs.md">
+<span>API 参考文档</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/cheat-sheet/">
+<span>Cheat Sheet</span>
+</a>
+</li><li class="has-child"><a href="#">
+<span>工具</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/use-tkctl/">
+<span>tkctl</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/tidb-toolkit/">
+<span>TiDB Toolkit</span>
+</a>
+</li></ul>
+</li><li class="has-child"><a href="#">
+<span>配置</span>
+<i class="icon-arrow"></i></a><ul><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/configure-tidb-binlog-drainer/">
+<span>tidb-drainer chart 配置</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/tidb-cluster-chart-config/">
+<span>tidb-cluster chart 配置</span>
+</a>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/configure-backup/">
+<span>tidb-backup chart 配置</span>
+</a>
+</li></ul>
+</li><li class="leaf-child">
+<a href="/docs-cn/tidb-in-kubernetes/stable/logs-collection/">
+<span>日志收集</span>
+</a>
+</li></ul>
+</li></ul>
+</div>
+</div>
+</div>
+<div class="archive">
+<div class="content markdown-body">
+<h1 id="kubernetes--tidb-operator-">Kubernetes 上使用 TiDB Operator 快速上手</h1>
+<p>本文档介绍了如何创建一个简单的 Kubernetes 集群，部署 TiDB Operator，并使用 TiDB Operator 部署 TiDB 集群。</p>
+<blockquote>
+<p><strong>警告：</strong></p>
+<p>本文中部署例子仅用于测试目的。<strong>不要</strong>直接用于生产环境。</p>
+</blockquote>
+<p>基本步骤如下：</p>
+<ol>
+<li><a href="#%E5%88%9B%E5%BB%BA-kubernetes-%E9%9B%86%E7%BE%A4">创建 Kubernetes 集群</a></li>
+<li><a href="#%E9%83%A8%E7%BD%B2-tidb-operator">部署 TiDB Operator</a></li>
+<li><a href="#%E9%83%A8%E7%BD%B2-tidb-%E9%9B%86%E7%BE%A4">部署 TiDB Cluster</a></li>
+<li><a href="#%E8%BF%9E%E6%8E%A5-tidb">连接 TiDB</a></li>
+</ol>
+<p>如果你已经有一个 Kubernetes 集群，可直接<a href="#%E9%83%A8%E7%BD%B2-tidb-operator">部署 TiDB Operator</a>。</p>
+<p>如果你想做生产部署，参考以下文档：</p>
+<ul>
+<li>公有云
+<ul>
+<li><a href="/docs-cn/tidb-in-kubernetes/stable/deploy-on-aws-eks">AWS 部署文档</a></li>
+<li><a href="/docs-cn/tidb-in-kubernetes/stable/deploy-on-gcp-gke">GKE 部署文档 (beta)</a></li>
+<li><a href="/docs-cn/tidb-in-kubernetes/stable/deploy-on-alibaba-cloud">阿里云部署文档</a></li>
+</ul>
+</li>
+<li>其他 Kubernetes 集群
+<ul>
+<li>熟悉<a href="/docs-cn/tidb-in-kubernetes/stable/prerequisites">集群环境要求</a></li>
+<li>参考<a href="/docs-cn/tidb-in-kubernetes/stable/configure-storage-class#%E6%9C%AC%E5%9C%B0-pv-%E9%85%8D%E7%BD%AE">本地 PV 配置</a> 配置本地存储，以便让 TiKV 使用低延迟本地存储</li>
+<li>参考<a href="/docs-cn/tidb-in-kubernetes/stable/deploy-tidb-operator">在 Kubernetes 部署 TiDB Operator</a> 部署 TiDB Operator</li>
+<li>参考<a href="/docs-cn/tidb-in-kubernetes/stable/deploy-on-general-kubernetes">在标准 Kubernetes 上部署 TiDB 集群</a> 部署 TiDB 集群</li>
+</ul>
+</li>
+</ul>
+<h2 id="-kubernetes-">创建 Kubernetes 集群</h2>
+<p>本节介绍了两种创建简单 Kubernetes 集群的方法，可用于测试在 TiDB Operator 下运行的 TiDB 集群。选择最适合你的环境的方案。</p>
+<ul>
+<li><a href="#%E4%BD%BF%E7%94%A8-kind-%E5%88%9B%E5%BB%BA-kubernetes-%E9%9B%86%E7%BE%A4">使用 kind</a> (在 Docker 中运行 Kubernetes)</li>
+<li><a href="#%E4%BD%BF%E7%94%A8-minikube-%E5%88%9B%E5%BB%BA-kubernetes-%E9%9B%86%E7%BE%A4">使用 minikube</a> (在虚拟机中运行 Kubernetes)</li>
+</ul>
+<p>你也可以使用 Google Cloud Shell 在 Google Cloud Platform 的 Google Kubernetes Engine 中部署 Kubernetes 集群，并遵循教程来部署 TiDB Operator 和 TiDB 集群：</p>
+<ul>
+<li><a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https://github.com/pingcap/docs-tidb-operator&amp;cloudshell_tutorial=zh/deploy-tidb-from-kubernetes-gke.md">打开 Google Cloud Shell</a></li>
+</ul>
+<h3 id="-kind--kubernetes-">使用 kind 创建 Kubernetes 集群</h3>
+<p>本节介绍如何使用 kind 部署 Kubernetes 集群。</p>
+<p><a href="https://kind.sigs.k8s.io/">kind</a> 是用于使用 Docker 容器作为集群节点运行本地 Kubernetes 集群的工具。它是为测试本地 Kubernetes 集群而开发的。Kubernetes 集群版本取决于 kind 使用的节点镜像，你可以指定要用于节点的镜像并选择任何发布的版本。请参阅 <a href="https://hub.docker.com/r/kindest/node/tags">Docker hub</a> 以查看可用 tags。默认使用当前 kind 支持的最新版本。</p>
+<blockquote>
+<p><strong>警告：</strong></p>
+<p>仅用于测试目的。<strong>不要</strong>直接用于生产环境。</p>
+</blockquote>
+<p>部署前，请确保满足以下要求：</p>
+<ul>
+<li><a href="https://docs.docker.com/install/">docker</a>：版本 &gt;= 17.03</li>
+<li><a href="https://kubernetes.io/docs/tasks/tools/install-kubectl">kubectl</a>：版本 &gt;= 1.12</li>
+<li><a href="https://kind.sigs.k8s.io/">kind</a>：版本 &gt;= 0.8.0</li>
+<li>若使用 Linux, <a href="https://linuxconfig.org/how-to-turn-on-off-ip-forwarding-in-linux">net.ipv4.ip_forward</a> 需要被设置为 <code>1</code></li>
+</ul>
+<p>以下以 0.8.1 版本为例：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kind create cluster
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">Creating cluster "kind" ...
+ ✓ Ensuring node image (kindest/node:v1.18.2) 🖼
+ ✓ Preparing nodes 📦
+ ✓ Writing configuration 📜
+ ✓ Starting control-plane 🕹️
+ ✓ Installing CNI 🔌
+ ✓ Installing StorageClass 💾
+Set kubectl context to "kind-kind"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-kind
+
+Thanks for using kind! 😊
+</code></pre></div><p>检查集群是否创建成功：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl cluster-info
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">Kubernetes master is running at https://127.0.0.1:51026
+KubeDNS is running at https://127.0.0.1:51026/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+</code></pre></div><p>现在就可以开始<a href="#%E9%83%A8%E7%BD%B2-tidb-operator">部署 TiDB Operator</a>！</p>
+<p>测试完成后，销毁集群，执行下面命令：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kind delete cluster
+</code></pre></div><h3 id="-minikube--kubernetes-">使用 minikube 创建 Kubernetes 集群</h3>
+<p>本节介绍如何使用 minikube 部署 Kubernetes 集群。</p>
+<p><a href="https://kubernetes.io/docs/setup/minikube/">Minikube</a> 可以在虚拟机中创建一个 Kubernetes 集群，可在 macOS, Linux 和 Windows 上运行。</p>
+<blockquote>
+<p><strong>警告：</strong></p>
+<p>仅用于测试目的。<strong>不要</strong>直接用于生产环境。</p>
+</blockquote>
+<p>部署前，请确保满足以下要求：</p>
+<ul>
+<li><a href="https://kubernetes.io/docs/tasks/tools/install-minikube/">Minikube</a>：版本 1.0.0+
+<ul>
+<li>Minikube 需要安装一个兼容的 hypervisor，详情见官方安装教程。</li>
+</ul>
+</li>
+<li><a href="https://kubernetes.io/docs/tasks/tools/install-kubectl">kubectl</a>: 版本 &gt;= 1.12</li>
+</ul>
+<blockquote>
+<p><strong>注意：</strong></p>
+<ul>
+<li>尽管 Minikube 支持通过 <code>--vm-driver=none</code> 选项使用主机 Docker 而不使用虚拟机，但是目前尚没有针对 TiDB Operator 做过全面的测试，可能会无法正常工作。如果你想在不支持虚拟化的系统（例如，VPS）上试用 TiDB Operator，可以考虑使用 <a href="/docs-cn/tidb-in-kubernetes/stable/get-started#%E4%BD%BF%E7%94%A8-kind-%E5%88%9B%E5%BB%BA-kubernetes-%E9%9B%86%E7%BE%A4">kind</a>。</li>
+</ul>
+</blockquote>
+<p>安装完 Minikube 后，可以执行下面命令启动一个 Kubernetes 集群：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">minikube start
+</code></pre></div><p>一切运行正常，会看到类似下面的输出。根据操作系统和使用的 hypervisor 会有些许差异。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">😄  minikube v1.10.1 on Darwin 10.15.4
+✨  Automatically selected the hyperkit driver. Other choices: docker, vmwarefusion
+💾  Downloading driver docker-machine-driver-hyperkit:
+    &gt; docker-machine-driver-hyperkit.sha256: 65 B / 65 B [---] 100.00% ? p/s 0s
+    &gt; docker-machine-driver-hyperkit: 10.90 MiB / 10.90 MiB  100.00% 1.76 MiB p
+🔑  The 'hyperkit' driver requires elevated permissions. The following commands will be executed:
+
+    $ sudo chown root:wheel /Users/user/.minikube/bin/docker-machine-driver-hyperkit
+    $ sudo chmod u+s /Users/user/.minikube/bin/docker-machine-driver-hyperkit
+
+
+💿  Downloading VM boot image ...
+    &gt; minikube-v1.10.0.iso.sha256: 65 B / 65 B [-------------] 100.00% ? p/s 0s
+    &gt; minikube-v1.10.0.iso: 174.99 MiB / 174.99 MiB [] 100.00% 6.63 MiB p/s 27s
+👍  Starting control plane node minikube in cluster minikube
+💾  Downloading Kubernetes v1.18.2 preload ...
+    &gt; preloaded-images-k8s-v3-v1.18.2-docker-overlay2-amd64.tar.lz4: 525.43 MiB
+🔥  Creating hyperkit VM (CPUs=2, Memory=4000MB, Disk=20000MB) ...
+🐳  Preparing Kubernetes v1.18.2 on Docker 19.03.8 ...
+🔎  Verifying Kubernetes components...
+🌟  Enabled addons: default-storageclass, storage-provisioner
+🏄  Done! kubectl is now configured to use "minikube"
+</code></pre></div><p>对于中国大陆用户，可以使用国内 gcr.io mirror 仓库，例如 <code>registry.cn-hangzhou.aliyuncs.com/google_containers</code>。</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">minikube start --image-repository registry.cn-hangzhou.aliyuncs.com/google_containers
+</code></pre></div><p>或者给 Docker 配置 HTTP/HTTPS 代理。</p>
+<p>将下面命令中的 <code>127.0.0.1:1086</code> 替换为你自己的 HTTP/HTTPS 代理地址：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">minikube start --docker-env https_proxy<span style="color:#f92672">=</span>http://127.0.0.1:1086 <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  --docker-env http_proxy<span style="color:#f92672">=</span>http://127.0.0.1:1086
+</code></pre></div><blockquote>
+<p><strong>注意：</strong></p>
+<p>由于 Minikube（默认）通过虚拟机运行，<code>127.0.0.1</code> 是虚拟机本身，因此，有些情况下可能需要将其修改为你的主机的实际 IP。</p>
+</blockquote>
+<p>参考 <a href="https://kubernetes.io/docs/setup/minikube/">Minikube setup</a> 查看配置虚拟机和 Kubernetes 集群的更多选项。</p>
+<p>执行以下命令检查集群状态，并确保可以通过 <code>kubectl</code> 访问集群:</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">kubectl cluster-info
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">Kubernetes master is running at https://192.168.64.2:8443
+KubeDNS is running at https://192.168.64.2:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+</code></pre></div><p>现在就可以开始<a href="#%E9%83%A8%E7%BD%B2-tidb-operator">部署 TiDB Operator</a>！</p>
+<p>测试完成后，销毁集群，执行下面命令：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">minikube delete
+</code></pre></div><h2 id="-tidb-operator">部署 TiDB Operator</h2>
+<p>开始之前，确保以下要求已满足：</p>
+<ul>
+<li>可以使用 <code>kubectl</code> 访问的 Kubernetes 集群</li>
+<li><a href="https://helm.sh/docs/intro/install/">Helm</a>: Helm 2 (&gt;= Helm 2.16.5) 或者最新的 Helm 3 稳定版</li>
+</ul>
+<ol>
+<li>
+<p>安装 TiDB Operator CRDs</p>
+<p>TiDB Operator 包含许多实现 TiDB 集群不同组件的自定义资源类型 (CRD)。执行以下命令安装 CRD 到集群中：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl apply -f https://raw.githubusercontent.com/pingcap/tidb-operator/v1.1.2/manifests/crd.yaml
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">customresourcedefinition.apiextensions.k8s.io/tidbclusters.pingcap.com created
+customresourcedefinition.apiextensions.k8s.io/backups.pingcap.com created
+customresourcedefinition.apiextensions.k8s.io/restores.pingcap.com created
+customresourcedefinition.apiextensions.k8s.io/backupschedules.pingcap.com created
+customresourcedefinition.apiextensions.k8s.io/tidbmonitors.pingcap.com created
+customresourcedefinition.apiextensions.k8s.io/tidbinitializers.pingcap.com created
+customresourcedefinition.apiextensions.k8s.io/tidbclusterautoscalers.pingcap.com created
+</code></pre></div></li>
+<li>
+<p>安装 TiDB Operator</p>
+<p>TiDB Operator 使用 helm 安装，使用用法略有不同，取决于 Helm 版本是 2 还是 3 。可使用 <code>helm version --short</code> 命令查看安装的版本：</p>
+<ol>
+<li>
+<p>如果使用的是 Helm 2，你需要安装服务端组件 tiller 。若使用 Helm 3 可跳过此步。</p>
+<p>应用 tiller 组件 RBAC 规则并安装 tiller 。</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl apply -f https://raw.githubusercontent.com/pingcap/tidb-operator/master/manifests/tiller-rbac.yaml <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>helm init --service-account<span style="color:#f92672">=</span>tiller --upgrade
+</code></pre></div><p>执行以下命令，检查并确认 tiller 的 Pod 是否运行起来：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl get po -n kube-system -l name<span style="color:#f92672">=</span>tiller
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">NAME                            READY   STATUS    RESTARTS   AGE
+tiller-deploy-b7b9488b5-j6m6p   1/1     Running   0          18s
+</code></pre></div><p>当 Ready 栏显示 <code>1/1</code> 时表明已经运行起来，可进入下一步操作。</p>
+</li>
+<li>
+<p>添加 PingCAP 仓库</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">helm repo add pingcap https://charts.pingcap.org/
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">"pingcap" has been added to your repositories  
+</code></pre></div></li>
+<li>
+<p>为 TiDB Operator 创建一个命名空间</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create namespace tidb-admin
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">namespace/tidb-admin created
+</code></pre></div></li>
+<li>
+<p>安装 TiDB Operator</p>
+<p><code>helm install</code> 语法在 Helm 2 和 Helm 3 下略有不同。</p>
+<ul>
+<li>
+<p>Helm 2:</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">helm install --namespace tidb-admin --name tidb-operator pingcap/tidb-operator --version v1.1.2
+</code></pre></div><p>如果访问 Docker Hub 网速较慢，可以使用阿里云上的镜像：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">helm install --namespace tidb-admin --name tidb-operator pingcap/tidb-operator --version v1.1.2 \
+  --set operatorImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-operator:v1.1.2 \
+  --set tidbBackupManagerImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-backup-manager:v1.1.2 \
+  --set scheduler.kubeSchedulerImageName=registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">NAME:   tidb-operator
+LAST DEPLOYED: Thu May 28 15:17:38 2020
+NAMESPACE: tidb-admin
+STATUS: DEPLOYED
+
+RESOURCES:
+==&gt; v1/ConfigMap
+NAME                   DATA  AGE
+tidb-scheduler-policy  1     0s
+
+==&gt; v1/Deployment
+NAME                     READY  UP-TO-DATE  AVAILABLE  AGE
+tidb-controller-manager  0/1    1           0          0s
+tidb-scheduler           0/1    1           0          0s
+
+==&gt; v1/Pod(related)
+NAME                                      READY  STATUS             RESTARTS  AGE
+tidb-controller-manager-6d8d5c6d64-b8lv4  0/1    ContainerCreating  0         0s
+tidb-controller-manager-6d8d5c6d64-b8lv4  0/1    ContainerCreating  0         0s
+
+==&gt; v1/ServiceAccount
+NAME                     SECRETS  AGE
+tidb-controller-manager  1        0s
+tidb-scheduler           1        0s
+
+==&gt; v1beta1/ClusterRole
+NAME                                   CREATED AT
+tidb-operator:tidb-controller-manager  2020-05-28T22:17:38Z
+tidb-operator:tidb-scheduler           2020-05-28T22:17:38Z
+
+==&gt; v1beta1/ClusterRoleBinding
+NAME                                   ROLE                                               AGE
+tidb-operator:kube-scheduler           ClusterRole/system:kube-scheduler                  0s
+tidb-operator:tidb-controller-manager  ClusterRole/tidb-operator:tidb-controller-manager  0s
+tidb-operator:tidb-scheduler           ClusterRole/tidb-operator:tidb-scheduler           0s
+tidb-operator:volume-scheduler         ClusterRole/system:volume-scheduler                0s
+
+
+NOTES:
+Make sure tidb-operator components are running:
+
+    kubectl get pods --namespace tidb-admin -l app.kubernetes.io/instance=tidb-operator
+</code></pre></div></li>
+<li>
+<p>Helm 3:</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.1.2
+</code></pre></div><p>如果访问 Docker Hub 网速较慢，可以使用阿里云上的镜像：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">helm install --namespace tidb-admin tidb-operator pingcap/tidb-operator --version v1.1.2 \
+  --set operatorImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-operator:v1.1.2 \
+  --set tidbBackupManagerImage=registry.cn-beijing.aliyuncs.com/tidb/tidb-backup-manager:v1.1.2 \
+  --set scheduler.kubeSchedulerImageName=registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">NAME: tidb-operator
+LAST DEPLOYED: Mon Jun  1 12:31:43 2020
+NAMESPACE: tidb-admin
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+Make sure tidb-operator components are running:
+
+    kubectl get pods --namespace tidb-admin -l app.kubernetes.io/instance=tidb-operator
+</code></pre></div></li>
+</ul>
+<p>使用以下命令检查 TiDB Operator 组件是否运行起来：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl get pods --namespace tidb-admin -l app.kubernetes.io/instance<span style="color:#f92672">=</span>tidb-operator
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">NAME                                       READY   STATUS    RESTARTS   AGE
+tidb-controller-manager-6d8d5c6d64-b8lv4   1/1     Running   0          2m22s
+tidb-scheduler-644d59b46f-4f6sb            2/2     Running   0          2m22s
+</code></pre></div><p>当所有的 pods 都处于 Running 状态时，可进行下一步操作。</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="-tidb-">部署 TiDB 集群</h2>
+<ol>
+<li>
+<p>部署 TiDB 集群</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl create namespace tidb-cluster <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>curl -LO https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/basic/tidb-cluster.yaml <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>kubectl -n tidb-cluster apply -f tidb-cluster.yaml
+</code></pre></div><p>如果访问 Docker Hub 网速较慢，可以使用阿里云上的镜像：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">kubectl create namespace tidb-cluster &amp;&amp; \
+curl -LO https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/basic-cn/tidb-cluster.yaml &amp;&amp; \
+kubectl -n tidb-cluster apply -f tidb-cluster.yaml
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">namespace/tidb-cluster created
+tidbcluster.pingcap.com/basic created
+</code></pre></div></li>
+<li>
+<p>部署 TiDB 集群监控</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">curl -LO https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/basic/tidb-monitor.yaml <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>kubectl -n tidb-cluster apply -f tidb-monitor.yaml
+</code></pre></div><p>如果访问 Docker Hub 网速较慢，可以使用阿里云上的镜像：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">curl -LO https://raw.githubusercontent.com/pingcap/tidb-operator/master/examples/basic-cn/tidb-monitor.yaml &amp;&amp; \
+kubectl -n tidb-cluster apply -f tidb-monitor.yaml
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">tidbmonitor.pingcap.com/basic created
+</code></pre></div></li>
+<li>
+<p>查看 Pod 状态</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">watch kubectl get po -n tidb-cluster
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">NAME                              READY   STATUS            RESTARTS   AGE
+basic-discovery-6bb656bfd-kjkxw   1/1     Running           0          29s
+basic-monitor-5fc8589c89-2mwx5    0/3     PodInitializing   0          20s
+basic-pd-0                        1/1     Running           0          29s
+</code></pre></div><p>等待所有组件 pods 都启动，看到每种类型（<code>-pd</code>，<code>-tikv</code> 和 <code>-tidb</code>）都处于 Running 状态时，您可以按 Ctrl-C 返回命令行，然后进行下一步：<a href="#%E8%BF%9E%E6%8E%A5-tidb">连接到 TiDB 集群</a>。</p>
+<p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">NAME                              READY   STATUS    RESTARTS   AGE
+basic-discovery-6bb656bfd-xl5pb   1/1     Running   0          9m9s
+basic-monitor-5fc8589c89-gvgjj    3/3     Running   0          8m58s
+basic-pd-0                        1/1     Running   0          9m8s
+basic-tidb-0                      2/2     Running   0          7m14s
+basic-tikv-0                      1/1     Running   0          8m13s
+</code></pre></div></li>
+</ol>
+<h2 id="-tidb">连接 TiDB</h2>
+<ol>
+<li>
+<p>安装 <code>mysql</code> 命令行工具</p>
+<p>要连接到 TiDB，您需要在使用 <code>kubectl</code> 的主机上安装与 MySQL 兼容的命令行客户端。可以安装 MySQL Server，MariaDB Server，Percona Server 的 mysql 可执行文件，也可以从操作系统软件仓库中安装。</p>
+<blockquote>
+<p><strong>注意：</strong></p>
+<ul>
+<li>当使用 MySQL Client 8.0 时，如果用户账户有配置密码，必须显示指定 <code>--default-auth=mysql_native_password</code> 参数，因为 <code>mysql_native_password</code> <a href="https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password">不再是默认的插件</a>。</li>
+</ul>
+</blockquote>
+</li>
+<li>
+<p>转发 4000 端口</p>
+<p>首先，将端口从本地主机转发到 Kubernetes 中的 TiDB <strong>Servcie</strong>。 我们先获取 tidb-cluster 命名空间中的服务列表：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl get svc -n tidb-cluster
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">NAME                     TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)              AGE
+basic-discovery          ClusterIP   10.101.69.5      &lt;none&gt;        10261/TCP            10m
+basic-grafana            ClusterIP   10.106.41.250    &lt;none&gt;        3000/TCP             10m
+basic-monitor-reloader   ClusterIP   10.99.157.225    &lt;none&gt;        9089/TCP             10m
+basic-pd                 ClusterIP   10.104.43.232    &lt;none&gt;        2379/TCP             10m
+basic-pd-peer            ClusterIP   None             &lt;none&gt;        2380/TCP             10m
+basic-prometheus         ClusterIP   10.106.177.227   &lt;none&gt;        9090/TCP             10m
+basic-tidb               ClusterIP   10.99.24.91      &lt;none&gt;        4000/TCP,10080/TCP   8m40s
+basic-tidb-peer          ClusterIP   None             &lt;none&gt;        10080/TCP            8m40s
+basic-tikv-peer          ClusterIP   None             &lt;none&gt;        20160/TCP            9m39s
+</code></pre></div><p>这个例子中，TiDB <strong>Service</strong> 是 <strong>basic-tidb</strong> 。使用以下命令转发本地端口到集群：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl port-forward -n tidb-cluster svc/basic-tidb <span style="color:#ae81ff">4000</span> &gt; pf4000.out &amp;
+</code></pre></div><p>命令会运行在后台，并将输出转发到文件 <code>pf4000.out</code> 。所以我们可以继续在当前 shell 会话中继续执行命令。</p>
+</li>
+<li>
+<p>连接 TiDB</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">mysql -h 127.0.0.1 -P <span style="color:#ae81ff">4000</span> -u root
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 76
+Server version: 5.7.25-TiDB-v4.0.0 MySQL Community Server (Apache License 2.0)
+
+Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql&gt; 
+</code></pre></div><p>以下是一些可以用来验证集群功能的命令：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">mysql&gt; create table hello_world (id int unsigned not null auto_increment primary key, v varchar(32));
+Query OK, 0 rows affected (0.17 sec)
+
+mysql&gt; select * from information_schema.tikv_region_status where db_name=database() and table_name='hello_world'\G
+*************************** 1. row ***************************
+       REGION_ID: 2
+       START_KEY: 7480000000000000FF3700000000000000F8
+         END_KEY:
+        TABLE_ID: 55
+         DB_NAME: test
+      TABLE_NAME: hello_world
+        IS_INDEX: 0
+        INDEX_ID: NULL
+      INDEX_NAME: NULL
+  EPOCH_CONF_VER: 5
+   EPOCH_VERSION: 23
+   WRITTEN_BYTES: 0
+      READ_BYTES: 0
+APPROXIMATE_SIZE: 1
+APPROXIMATE_KEYS: 0
+1 row in set (0.03 sec)
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">mysql&gt; select tidb_version()\G
+*************************** 1. row ***************************
+tidb_version(): Release Version: v4.0.0
+Edition: Community
+Git Commit Hash: 689a6b6439ae7835947fcaccf329a3fc303986cb
+Git Branch: heads/refs/tags/v4.0.0
+UTC Build Time: 2020-05-28 01:37:40
+GoVersion: go1.13
+Race Enabled: false
+TiKV Min Version: v3.0.0-60965b006877ca7234adaced7890d7b029ed1306
+Check Table Before Drop: false
+1 row in set (0.00 sec)
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">mysql&gt; select * from information_schema.tikv_store_status\G
+*************************** 1. row ***************************
+         STORE_ID: 4
+          ADDRESS: basic-tikv-0.basic-tikv-peer.tidb-cluster.svc:20160
+      STORE_STATE: 0
+ STORE_STATE_NAME: Up
+            LABEL: null
+          VERSION: 4.0.0
+         CAPACITY: 58.42GiB
+        AVAILABLE: 36.18GiB
+     LEADER_COUNT: 3
+    LEADER_WEIGHT: 1
+     LEADER_SCORE: 3
+      LEADER_SIZE: 3
+     REGION_COUNT: 21
+    REGION_WEIGHT: 1
+     REGION_SCORE: 21
+      REGION_SIZE: 21
+         START_TS: 2020-05-28 22:48:21
+LAST_HEARTBEAT_TS: 2020-05-28 22:52:01
+           UPTIME: 3m40.598302151s
+1 rows in set (0.01 sec)
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">mysql&gt; select * from information_schema.cluster_info\G
+*************************** 1. row ***************************
+          TYPE: tidb
+      INSTANCE: basic-tidb-0.basic-tidb-peer.tidb-cluster.svc:4000
+STATUS_ADDRESS: basic-tidb-0.basic-tidb-peer.tidb-cluster.svc:10080
+       VERSION: 5.7.25-TiDB-v4.0.0
+      GIT_HASH: 689a6b6439ae7835947fcaccf329a3fc303986cb
+    START_TIME: 2020-05-28T22:50:11Z
+        UPTIME: 3m21.459090928s
+*************************** 2. row ***************************
+          TYPE: pd
+      INSTANCE: basic-pd:2379
+STATUS_ADDRESS: basic-pd:2379
+       VERSION: 4.0.0
+      GIT_HASH: 56d4c3d2237f5bf6fb11a794731ed1d95c8020c2
+    START_TIME: 2020-05-28T22:45:04Z
+        UPTIME: 8m28.459091915s
+*************************** 3. row ***************************
+          TYPE: tikv
+      INSTANCE: basic-tikv-0.basic-tikv-peer.tidb-cluster.svc:20160
+STATUS_ADDRESS: 0.0.0.0:20180
+       VERSION: 4.0.0
+      GIT_HASH: 198a2cea01734ce8f46d55a29708f123f9133944
+    START_TIME: 2020-05-28T22:48:21Z
+        UPTIME: 5m11.459102648s
+3 rows in set (0.01 sec)
+</code></pre></div></li>
+<li>
+<p>载入 Grafana 面板</p>
+<p>像上面对 TiDB 4000 端口转发一样，可以转发 Grafana 端口，以便本地访问 Grafana 面板。</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl port-forward -n tidb-cluster svc/basic-grafana <span style="color:#ae81ff">3000</span> &gt; pf3000.out &amp;
+</code></pre></div><p>Grafana 面板可在 kubectl 所运行的主机上通过 <a href="http://localhost:3000">http://localhost:3000</a> 访问。注意，如果你是非本机（比如 Docker 容器或远程服务器）上运行 <code>kubectl port-forward</code>，将无法在本地浏览器里通过 <code>localhost:3000</code> 访问。</p>
+<p>默认用户名和密码都是 “admin” 。</p>
+<p>了解更多使用 TiDB Operator 部署 TiDB 集群监控的信息，可以查阅<a href="/docs-cn/tidb-in-kubernetes/stable/monitor-using-tidbmonitor">使用 TidbMonitor 监控 TiDB 集群</a>。</p>
+</li>
+</ol>
+<h2 id="-tidb--1">升级 TiDB 集群</h2>
+<p>TiDB Operator 还可简化 TiDB 集群的滚动升级。以下示例更新 TiDB 版本到 “nightly” 版本。</p>
+<p>Kubernetes 可以直接编辑已部署的资源，或给已部署的资源应用补丁。</p>
+<p><code>kubectl edit</code> 在交互式文本编辑器中打开资源，管理员可以在其中进行更改并保存。如果更改有效，它们将被提交到集群。如果更改无效，它们将会被拒绝并显示一条错误消息。请注意，目前尚不对所有字段进行验证。保存某些更改后，即使更改被接受也不一定会对集群生效。</p>
+<p><code>kubectl patch</code> 可直接应用补丁。Kubernetes 支持几种不同的补丁策略，每种策略有不同的功能、格式等。可参考 <a href="https://kubernetes.io/docs/tasks/manage-kubernetes-objects/update-api-object-kubectl-patch/">Kubernetes Patch</a> 了解更多细节。</p>
+<ol>
+<li>
+<p>修改 TiDB 集群版本</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl patch tc basic -n tidb-cluster --type merge -p <span style="color:#e6db74">'{"spec": {"version": "release-4.0-nightly"} }'</span>
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">tidbcluster.pingcap.com/basic patched
+</code></pre></div></li>
+<li>
+<p>等待所有 pods 重启</p>
+<p>执行此命令以了解集群升级组件时的进度。你可以看到某些 pods 进入 Terminating 状态后，又回到 ContainerCreating，最后重新进入 Running 状态。</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">watch kubectl get po -n tidb-cluster
+</code></pre></div><p>期望输出：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">NAME                              READY   STATUS        RESTARTS   AGE
+basic-discovery-6bb656bfd-7lbhx   1/1     Running       0          24m
+basic-pd-0                        1/1     Terminating   0          5m31s
+basic-tidb-0                      2/2     Running       0          2m19s
+basic-tikv-0                      1/1     Running       0          4m13s
+</code></pre></div></li>
+<li>
+<p>转发端口</p>
+<p>当所有 pods 都重启后，将看到版本号已更改。现在可以重新运行 <code>kubeclt port-forward</code> 命令进行端口转发，以便访问集群中 TiDB 集群。</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">kubectl port-forward -n tidb-cluster svc/basic-tidb 4000 &gt; pf4000.out &amp;
+</code></pre></div></li>
+<li>
+<p>访问并检查集群版本</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">mysql -h 127.0.0.1 -P 4000 -u root -e 'select tidb_version()\G'
+</code></pre></div><p>期望输出：</p>
+<blockquote>
+<p><strong>注意：</strong>
+<code>release-4.0-nightly</code> 不是固定版本，不同时间会有不同结果</p>
+</blockquote>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">*************************** 1. row ***************************
+tidb_version(): Release Version: v4.0.0-6-gdec49a126
+Edition: Community
+Git Commit Hash: dec49a12654c4f09f6fedfd2a0fb0154fc095449
+Git Branch: release-4.0
+UTC Build Time: 2020-06-01 10:07:32
+GoVersion: go1.13
+Race Enabled: false
+TiKV Min Version: v3.0.0-60965b006877ca7234adaced7890d7b029ed1306
+Check Table Before Drop: false
+</code></pre></div></li>
+</ol>
+<h2 id="-tidb--2">销毁 TiDB 集群</h2>
+<p>完成测试后，您可能希望销毁 TiDB 集群：</p>
+<p>销毁 Kubernetes 集群取决于 Kubernetes 集群的创建方式。可参考前面 Kubernetes 创建文档部分。以下是销毁 TiDB 集群方式，不会影响 Kubernetes 集群本身。</p>
+<ol>
+<li>
+<p>删除 TiDB Cluster</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl delete tc basic -n tidb-cluster
+</code></pre></div></li>
+<li>
+<p>删除 TiDB Monitor</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl delete tidbmonitor basic -n tidb-cluster
+</code></pre></div></li>
+<li>
+<p>删除 PV 数据</p>
+<p>如果您的部署具有持久性数据存储，则删除 TiDB 群集将不会删除群集的数据。 如果不再需要数据，可以运行以下命令来清理数据：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl delete pvc -n tidb-cluster -l app.kubernetes.io/instance<span style="color:#f92672">=</span>basic,app.kubernetes.io/managed-by<span style="color:#f92672">=</span>tidb-operator <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>kubectl get pv -l app.kubernetes.io/namespace<span style="color:#f92672">=</span>tidb-cluster,app.kubernetes.io/managed-by<span style="color:#f92672">=</span>tidb-operator,app.kubernetes.io/instance<span style="color:#f92672">=</span>basic -o name | xargs -I <span style="color:#f92672">{</span><span style="color:#f92672">}</span> kubectl patch <span style="color:#f92672">{</span><span style="color:#f92672">}</span> -p <span style="color:#e6db74">'{"spec":{"persistentVolumeReclaimPolicy":"Delete"}}'</span>
+</code></pre></div></li>
+<li>
+<p>删除命名空间</p>
+<p>为确保没有残余资源，您可以删除用于 TiDB 集群的命名空间。</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl delete namespace tidb-cluster
+</code></pre></div></li>
+<li>
+<p>停止 <code>kubectl</code> 的端口转发</p>
+<p>如果您仍在运行正在转发端口的 <code>kubectl</code> 进程，请终止它们：</p>
+<div class="copyable-code-block shell-regular">
+</div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">pgrep -lfa kubectl
+</code></pre></div></li>
+</ol>
+<p>查看更多相关信息，可以查阅<a href="#%E9%94%80%E6%AF%81-tidb-%E9%9B%86%E7%BE%A4">销毁 TiDB 集群</a>。</p>
+</div>
+<div class="article-toc"></div>
+</div>
+<div class="sidebar-page sticky-sidebar">
+<a class="improve-doc" href="https://github.com/pingcap/docs-tidb-operator/edit/release-1.1/zh/get-started.md" target="_blank">
+<svg fill="#142848" height="14" viewbox="0 0 275.836 275.836" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M191.344 20.922l-95.155 95.155a5.99 5.99 0 0 0-1.565 2.734l-8.167 31.454a6.003 6.003 0 0 0 7.315 7.316l31.454-8.168a6.003 6.003 0 0 0 2.734-1.565l95.153-95.153.005-.004.004-.005 19.156-19.156a5.998 5.998 0 0 0 .001-8.484L218.994 1.758a5.998 5.998 0 0 0-8.485 0l-19.155 19.155-.005.004-.005.005zm-70.713 117.286l-19.993 5.192 5.191-19.993 89.762-89.762 14.801 14.802-89.761 89.761zm94.12-123.723l14.801 14.802-10.675 10.675-14.801-14.802 10.675-10.675z"></path><path d="M238.037 65.022a6 6 0 0 0-6 6v192.813H43.799V34.417h111.063a6 6 0 0 0 0-12H37.799a6 6 0 0 0-6 6v241.419a6 6 0 0 0 6 6h200.238a6 6 0 0 0 6-6V71.022a6 6 0 0 0-6-6z"></path></svg>
+    修改本文
+</a>
+<a class="request-docs-changes" href="https://github.com/pingcap/docs-tidb-operator/issues/new?body=File:%20[%2fzh%2fget-started.md](https%3a%2f%2fpingcap.com%2fdocs-cn%2ftidb-in-kubernetes%2fv1.1%2fget-started%2f)" target="_blank">
+<svg height="14px" version="1.1" viewbox="0 0 192 192" width="14px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g fill="none" fill-rule="nonzero" font-family="none" font-size="none" font-weight="none" stroke="none" stroke-dasharray="" stroke-dashoffset="0" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-width="1" style="mix-blend-mode: normal" text-anchor="none"><path d="M0,192v-192h192v192z" fill="none"></path><g fill="#142848"><path d="M162.34375,42.34375l-90.34375,90.34375l-34.34375,-34.34375l-11.3125,11.3125l45.65625,45.65625l101.65625,-101.65625z"></path></g></g></svg>
+
+    反馈文档问题
+</a>
+<p class="toc-title">本页导航</p>
+<div id="smart_toc_wrapper"></div>
+</div>
+</div>
+</div>
+<footer>
+<div class="container">
+<div class="flex-list-wrap">
+<div class="flex-list">
+<h4 class="list-title"><strong>产品</strong></h4>
+<ul>
+<li><a href="/docs-cn/v3.0/" onclick="trackViews('footer-product-tidb', 'docs-cn_view')">TiDB</a></li>
+<li><a href="/docs-cn/v3.0/reference/tispark/">TiSpark</a></li>
+<li><a href="/docs-cn/v3.0/roadmap/">TiDB 路线图</a></li>
+</ul>
+</div>
+<div class="flex-list">
+<h4 class="list-title"><strong>文档</strong></h4>
+<ul>
+<li><a href="https://docs.pingcap.com/zh/tidb/v4.0/quick-start-with-tidb">快速入门</a></li>
+<li><a href="/blog-cn/tidb-best-practice/">最佳实践</a></li>
+<li><a href="/docs-cn/stable/faq/tidb/">常见问题解答</a></li>
+<li><a href="/docs-cn/stable/reference/tools/user-guide/">TiDB 周边工具</a></li>
+<li><a href="https://docs.pingcap.com/zh/tidb/dev/release-notes">版本发布说明</a></li>
+</ul>
+</div>
+<div class="flex-list">
+<h4 class="list-title"><strong>资源</strong></h4>
+<ul>
+<li><a href="/blog-cn/">博客</a></li>
+<li><a href="https://github.com/pingcap" target="_blank">GitHub</a></li>
+<li><a href="https://book.tidb.io" target="_blank">TiDB in Action</a></li>
+<li><a href="https://university.pingcap.com/" onclick="trackViews('footer-source-university', 'pingcap-university_view')" target="_blank">PingCAP
+                    University</a></li>
+<li><a href="/solutions/intel/" onclick="trackViews('footer-resource-solutions', 'solutions_view')">联合解决方案</a></li>
+<li><a href="https://asktug.com/" onclick="trackViews('footer-resource-asktug', 'asktug_view')" target="_blank">Ask TUG</a></li>
+</ul>
+</div>
+<div class="flex-list">
+<h4 class="list-title"><strong>公司</strong></h4>
+<ul>
+<li><a href="/about-cn/">关于我们</a></li>
+<li><a href="/about-cn/recruit/join/" onclick="trackViews('footer-recruit-join', 'recruit-join_view')">招贤纳士</a>
+</li>
+<li><a href="/about-cn/news/">新闻报道</a></li>
+<li><a href="/zh/privacy-policy/">隐私申明</a></li>
+</ul>
+</div>
+</div>
+<div class="contact-list-wrap">
+<div class="flex-list">
+<h4 class="list-title"><strong>联系我们</strong></h4>
+<ul>
+<li><a class="twitter" href="https://twitter.com/PingCAP" target="_blank"><svg height="19" viewbox="0 0 612 612" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M612 116.258a250.714 250.714 0 0 1-72.088 19.772c25.929-15.527 45.777-40.155 55.184-69.411-24.322 14.379-51.169 24.82-79.775 30.48-22.907-24.437-55.49-39.658-91.63-39.658-69.334 0-125.551 56.217-125.551 125.513 0 9.828 1.109 19.427 3.251 28.606-104.326-5.24-196.835-55.223-258.75-131.174-10.823 18.51-16.98 40.078-16.98 63.101 0 43.559 22.181 81.993 55.835 104.479a125.556 125.556 0 0 1-56.867-15.756v1.568c0 60.806 43.291 111.554 100.693 123.104-10.517 2.83-21.607 4.398-33.08 4.398-8.107 0-15.947-.803-23.634-2.333 15.985 49.907 62.336 86.199 117.253 87.194-42.947 33.654-97.099 53.655-155.916 53.655-10.134 0-20.116-.612-29.944-1.721 55.567 35.681 121.536 56.485 192.438 56.485 230.948 0 357.188-191.291 357.188-357.188l-.421-16.253c24.666-17.593 46.005-39.697 62.794-64.861z"></path></svg> Twitter</a></li>
+<li><a class="linkedin" href="https://www.linkedin.com/company/pingcap/" target="_blank"><svg height="16" viewbox="0 0 438.536 438.535" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M5.424 145.895H99.64v282.932H5.424zM408.842 171.739c-19.791-21.604-45.967-32.408-78.512-32.408-11.991 0-22.891 1.475-32.695 4.427-9.801 2.95-18.079 7.089-24.838 12.419-6.755 5.33-12.135 10.278-16.129 14.844-3.798 4.337-7.512 9.389-11.136 15.104v-40.232h-93.935l.288 13.706c.193 9.139.288 37.307.288 84.508 0 47.205-.19 108.777-.572 184.722h93.931V270.942c0-9.705 1.041-17.412 3.139-23.127 4-9.712 10.037-17.843 18.131-24.407 8.093-6.572 18.13-9.855 30.125-9.855 16.364 0 28.407 5.662 36.117 16.987 7.707 11.324 11.561 26.98 11.561 46.966V428.82h93.931V266.664c-.007-41.688-9.897-73.328-29.694-94.925zM53.103 9.708c-15.796 0-28.595 4.619-38.4 13.848C4.899 32.787 0 44.441 0 58.529 0 72.42 4.758 84.034 14.275 93.358c9.514 9.325 22.078 13.99 37.685 13.99h.571c15.99 0 28.887-4.661 38.688-13.99 9.801-9.324 14.606-20.934 14.417-34.829-.19-14.087-5.047-25.742-14.561-34.973C81.562 14.323 68.9 9.708 53.103 9.708z"></path></svg> LinkedIn</a></li>
+<li><a class="reddit" href="https://www.reddit.com/r/TiDB/" target="_blank"><svg height="18" viewbox="0 0 279.748 279.748" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M279.748 133.142c0-19.299-15.701-35-35-35-10.768 0-20.674 4.812-27.279 13.064-18.532-8.431-39.663-13.626-62.015-15.271l19.206-60.692 42.895 9.294c3.285 12.782 14.901 22.258 28.693 22.258 16.336 0 29.627-13.29 29.627-29.626 0-16.336-13.291-29.627-29.627-29.627-11.801 0-21.999 6.941-26.759 16.95l-49.497-10.725a10.002 10.002 0 0 0-11.651 6.756L134.636 95.43c-26.164.638-50.988 6.053-72.356 15.775-6.606-8.251-16.512-13.063-27.28-13.063-19.299 0-35 15.701-35 35 0 9.373 3.683 18.173 10.222 24.709-3.9 8.37-5.875 17.076-5.875 25.936 0 24.048 14.396 46.492 40.538 63.199 25.447 16.264 59.183 25.221 94.989 25.221 35.808 0 69.542-8.957 94.989-25.221 26.142-16.707 40.538-39.151 40.538-63.199 0-8.859-1.975-17.565-5.875-25.936 6.539-6.537 10.222-15.336 10.222-24.709zM15.369 145.139c-2.212-3.59-3.369-7.688-3.369-11.997 0-12.682 10.317-23 23-23 5.444 0 10.558 1.851 14.649 5.258-14.622 8.302-26.132 18.289-34.28 29.739zm52.671 20.266c0-13.785 11.215-25 25-25s25 11.215 25 25-11.215 25-25 25-25-11.215-25-25zm123.119 57.054c-9.745 10.637-29.396 17.244-51.285 17.244-21.888 0-41.539-6.607-51.284-17.244a9.937 9.937 0 0 1-2.617-7.192 9.933 9.933 0 0 1 3.235-6.937 9.974 9.974 0 0 1 6.754-2.627c2.797 0 5.484 1.183 7.373 3.244 5.803 6.333 20.827 10.756 36.539 10.756s30.737-4.423 36.539-10.756a10.022 10.022 0 0 1 7.374-3.244c2.508 0 4.906.933 6.755 2.627a9.928 9.928 0 0 1 3.234 6.937 9.933 9.933 0 0 1-2.617 7.192zm-4.451-32.054c-13.785 0-25-11.215-25-25s11.215-25 25-25 25 11.215 25 25-11.215 25-25 25zm77.671-45.266c-8.147-11.45-19.657-21.436-34.28-29.739 4.092-3.408 9.205-5.258 14.649-5.258 12.683 0 23 10.318 23 23 0 4.309-1.157 8.407-3.369 11.997z"></path></svg> Reddit</a></li>
+<li><a class="google-plus" href="https://groups.google.com/forum/#!forum/tidb-user" target="_blank"><svg height="20" viewbox="0 0 491.858 491.858" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M377.472 224.957H201.319v58.718H308.79c-16.032 51.048-63.714 88.077-120.055 88.077-69.492 0-125.823-56.335-125.823-125.824 0-69.492 56.333-125.823 125.823-125.823 34.994 0 66.645 14.289 89.452 37.346l42.622-46.328c-34.04-33.355-80.65-53.929-132.074-53.929C84.5 57.193 0 141.693 0 245.928s84.5 188.737 188.736 188.737c91.307 0 171.248-64.844 188.737-150.989v-58.718l-.001-.001zM491.858 224.857h-36.031v-36.031h-30.886v36.031H388.91v30.883h36.031v36.032h30.886V255.74h36.031z"></path></svg> Google Group</a></li>
+<li><a class="stack-overflow" href="https://stackoverflow.com/questions/tagged/tidb" target="_blank"><svg height="17" viewbox="0 0 547.597 547.597" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M140.81 475.111h.024l189.91-.269c8.434-.013 15.3-6.886 15.3-15.318v-21.298c0-8.428-6.854-15.288-15.3-15.288l-189.91.264c-8.433.012-15.3 6.885-15.3 15.318v21.31c.001 8.427 6.855 15.281 15.276 15.281z"></path><path d="M58.667 517.854c.073 29.26.073 29.449 3.072 29.449h.055l10.612.294h.086s85.814 0 171.629-.036c42.914-.019 85.821-.05 118-.092 16.09-.019 29.505-.043 38.887-.074 17.803-.055 17.803-.055 17.803-3.072l.3-10.697V333.299c0-8.434-6.866-15.3-15.3-15.3h-11.909c-8.434 0-15.3 6.866-15.3 15.3V496.22c0 5.062-4.119 9.18-9.181 9.18H110.51c-5.061 0-9.18-4.118-9.18-9.18V333.299c0-8.434-6.867-15.3-15.3-15.3H73.82c-8.433 0-15.3 6.86-15.3 15.3 0 23.342.012 76.084.055 122.981.019 23.447.05 45.442.092 61.574z"></path><path d="M142.322 397.399l189.402 17.467c.478.043.948.062 1.413.062 7.956 0 14.468-5.985 15.159-13.917l1.83-21.096c.729-8.396-5.508-15.851-13.898-16.628l-189.102-17.461c-8.593-.795-15.869 5.441-16.653 13.825l-1.97 21.108a15.172 15.172 0 0 0 3.452 11.181 15.19 15.19 0 0 0 10.367 5.459zM437.636 208.849a15.253 15.253 0 0 0 17.694 12.443l21.065-3.678c8.311-1.451 13.898-9.395 12.454-17.706l-32.504-187.23c-1.42-8.207-9.21-13.917-17.692-12.448l-21.065 3.678c-8.311 1.451-13.898 9.395-12.454 17.705l32.502 187.236zM190.333 194.375l163.6 96.708a15.28 15.28 0 0 0 7.778 2.136c5.393 0 10.447-2.876 13.183-7.509l10.876-18.36c2.08-3.519 2.674-7.631 1.658-11.591a15.18 15.18 0 0 0-7.032-9.358l-163.6-96.714c-7.014-4.149-16.836-1.597-20.967 5.374l-10.869 18.36a15.2 15.2 0 0 0-1.658 11.591 15.21 15.21 0 0 0 7.031 9.363zM387.525 240.501a15.276 15.276 0 0 0 12.626 6.659c3.091 0 6.077-.924 8.635-2.681l17.405-11.934c6.953-4.768 8.752-14.314 4.015-21.292L323.29 54.104c-4.584-6.732-14.498-8.623-21.236-3.984l-17.737 12.21c-6.945 4.779-8.727 14.327-3.971 21.291l107.179 156.88zM154.482 302.319l183.465 49.156c1.298.349 2.632.526 3.966.526 6.903 0 12.98-4.67 14.762-11.347l5.508-20.624c2.179-8.152-2.681-16.555-10.826-18.74l-183.465-49.162c-8.017-2.148-16.604 2.852-18.728 10.826l-5.508 20.63c-2.179 8.142 2.68 16.551 10.826 18.735z"></path></svg> Stack Overflow</a></li>
+<li id="wechat"><a class="wechat" href="javascript:void(0)"><svg height="17" viewbox="0 0 31.403 31.404" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M31.403 21.306c0-4.597-4.388-8.32-9.8-8.32-5.414 0-9.802 3.725-9.802 8.32 0 4.597 4.388 8.322 9.802 8.322 1.701 0 3.302-.369 4.697-1.019l3.863 1.671-.447-4.309c1.066-1.329 1.687-2.937 1.687-4.665zm-13.102-2.254a1.395 1.395 0 1 1 0-2.79 1.395 1.395 0 0 1 0 2.79zm6.604 0a1.395 1.395 0 1 1 .003-2.79 1.395 1.395 0 0 1-.003 2.79z"></path><path d="M21.604 11.885c1.515 0 2.957.27 4.271.755.009-.175.03-.345.03-.521 0-6.074-5.801-10.996-12.953-10.996C5.799 1.123 0 6.044 0 12.119c0 2.284.822 4.408 2.229 6.167l-.591 5.694 5.104-2.213c1.264.59 2.661.986 4.136 1.189a8.143 8.143 0 0 1-.179-1.65c.001-5.195 4.892-9.421 10.905-9.421zm-4.287-6.428a1.84 1.84 0 1 1-1.841 1.84c0-1.016.825-1.84 1.841-1.84zM8.586 9.139a1.84 1.84 0 0 1 0-3.682 1.84 1.84 0 1 1 0 3.682z"></path></svg> 微信公众号</a> <div class="qr_code_outer f-hide f-tc">
+<div class="qr_code">
+<i id="close_qrcode"><svg viewbox="0 0 224.512 224.512" xmlns="http://www.w3.org/2000/svg"><path d="M224.507 6.997L217.521 0 112.256 105.258 6.998 0 .005 6.997l105.258 105.257L.005 217.512l6.993 7L112.256 119.24l105.265 105.272 6.986-7-105.258-105.258z" fill="#010002"></path></svg></i>
+<img alt="Wechat qrCode" class="qr_code_img" id="js_qr_code_img" src="/images/wechat-qrcode.jpg"/>
+<p>微信扫一扫<br/> 微信ID：pingcap2015</p>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="subscribe" id="subscribe-pc"></div>
+</div>
+</div>
+<div class="container copyright-container">
+<p class="copyright">© 2020 北京平凯星辰科技发展有限公司</p>
+<a class="copyright-btn-lang copyright-btn-en" href="/docs/tidb-in-kubernetes/stable" id="lang">English</a>
+<a class="prepared-num" href="http://www.beian.miit.gov.cn/">京 ICP 备 16046278 号 - 2</a>
+</div>
+</footer>
+<button class="back-to-top" type="button"><svg height="512" viewbox="0 0 284.929 284.929" width="512" xmlns="http://www.w3.org/2000/svg"><path d="M282.082 195.285L149.028 62.24c-1.901-1.903-4.088-2.856-6.562-2.856s-4.665.953-6.567 2.856L2.856 195.285C.95 197.191 0 199.378 0 201.853c0 2.474.953 4.664 2.856 6.566l14.272 14.271c1.903 1.903 4.093 2.854 6.567 2.854s4.664-.951 6.567-2.854l112.204-112.202 112.208 112.209c1.902 1.903 4.093 2.848 6.563 2.848 2.478 0 4.668-.951 6.57-2.848l14.274-14.277c1.902-1.902 2.847-4.093 2.847-6.566.001-2.476-.944-4.666-2.846-6.569z" fill="#FFF"></path></svg>
+</button>
+</div><div class="overlay"></div><script src="https://download.pingcap.com/js/jquery.min.js"></script><script src="/js/vendor/lazyload.min.js" type="text/javascript"></script>
+<script src="/js/doc.js" type="text/javascript"></script>
+<script src="/js/anchor.js" type="text/javascript"></script><script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script><script src="https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.js"></script><script crossorigin="anonymous" integrity="sha384-jbFinqIbKkHNg+QL+yxB4VrBC0EAPTuaLGeRT0T+NfEV89YC6u1bKxHLwoo+/xxY" src="https://browser.sentry-cdn.com/5.11.0/bundle.min.js"></script><script>Sentry.init({ 
+            dsn: 'https://3f28ed393c5545daa74496b3cdb2e9ba@sentry.io/1887163' 
+        });</script><script src="/js/app.js"></script></body></html>
